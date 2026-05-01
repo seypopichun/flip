@@ -1,7 +1,6 @@
 # init.ps1 – ONE-TIME installer
 
 # ── Admin ───────────────────────────────────────────────
-Write-Host "Check for admin rights"
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 if (-not $isAdmin) {
     $initUrl = "https://raw.githubusercontent.com/seypopichun/flip/refs/heads/main/init.ps1"
@@ -21,7 +20,7 @@ $taskName = "AutoJumping"
 $intervalMinutes = 1
 # ─────────────────────────────────────────────────────────────────────────────
 
-Write-Host "Downloading jumping.ps1..."
+Write-Host "Downloading jumping.ps1....."
 Invoke-WebRequest -Uri $rawUrl -OutFile $destination -UseBasicParsing
 Write-Host "Saved: $destination"
 
@@ -57,3 +56,4 @@ Write-Host ""
 Write-Host "Done! Task '$taskName' registered."
 Write-Host "  Runs every $intervalMinutes min + at every system startup."
 Write-Host "  init.ps1 is no longer needed."
+
