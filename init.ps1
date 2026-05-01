@@ -1,40 +1,33 @@
-# init.ps1 – ONE-TIME installer
+# init.ps1 – Installer / Updater (re-runs safely every time)
 
-# ── Admin ───────────────────────────────────────────────
-$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-if (-not $isAdmin) {
-    $initUrl = "https://raw.githubusercontent.com/seypopichun/flip/refs/heads/main/init.ps1"
-    $urlToPass = if ($rawUrl) { $rawUrl } else { "" }
-    Start-Process powershell -Verb RunAs `
-        -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"& { `$rawUrl='$urlToPass'; irm '$initUrl' | iex }`""
-    exit
-}
-# ─────────────────────────────────────────────────────────────────────────────
 
-# ──  Settings ────────────────────────────────────────────────────────────────
+# ── Settings ─────────────────────────────────────────────────────────────────
 if ([string]::IsNullOrEmpty($rawUrl)) {
     $rawUrl = "https://raw.githubusercontent.com/seypopichun/flip/refs/heads/main/jumping.ps1"
 }
-$destination = "$env:APPDATA\jumping.ps1"  
+$destination = "$env:APPDATA\jumping.ps1"
 $taskName = "AutoJumping"
-$intervalMinutes = 1
 # ─────────────────────────────────────────────────────────────────────────────
 
-Write-Host "Downloading jumping.ps1....."
+# ── 1. Always download a fresh copy of jumping.ps1 ───────────────────────────
+Write-Host "Downloading jumping.ps1 from $rawUrl ..."
 Invoke-WebRequest -Uri $rawUrl -OutFile $destination -UseBasicParsing
 Write-Host "Saved: $destination"
+# ─────────────────────────────────────────────────────────────────────────────
 
+# ── 2. Stop the old task if it is running ────────────────────────────────────
+$existingTask = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+if ($existingTask -and $existingTask.State -eq "Running") {
+    Stop-ScheduledTask -TaskName $taskName
+    Write-Host "Stopped running task '$taskName'."
+}
+# ─────────────────────────────────────────────────────────────────────────────
 
+# ── 3. Register (or re-register) the scheduled task ──────────────────────────
+#   jumping.ps1 now contains its own loop, so we just call it once.
 $action = New-ScheduledTaskAction `
     -Execute  "powershell.exe" `
     -Argument "-NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$destination`""
-
-
-$triggerRepeat = New-ScheduledTaskTrigger `
-    -Once `
-    -At                 ((Get-Date).AddMinutes(1)) `
-    -RepetitionInterval ([TimeSpan]::FromMinutes($intervalMinutes))
-
 
 $triggerBoot = New-ScheduledTaskTrigger -AtStartup
 
@@ -47,13 +40,17 @@ $settings = New-ScheduledTaskSettingsSet `
 Register-ScheduledTask `
     -TaskName $taskName `
     -Action   $action `
-    -Trigger  @($triggerRepeat, $triggerBoot) `
+    -Trigger  $triggerBoot `
     -Settings $settings `
     -RunLevel Highest `
     -Force | Out-Null
 
-Write-Host ""
-Write-Host "Done! Task '$taskName' registered."
-Write-Host "  Runs every $intervalMinutes min + at every system startup."
-Write-Host "  init.ps1 is no longer needed."
+Write-Host "Task '$taskName' registered (or updated)."
+# ─────────────────────────────────────────────────────────────────────────────
 
+# ── 4. Start the task immediately (no reboot needed) ─────────────────────────
+Start-ScheduledTask -TaskName $taskName
+Write-Host ""
+Write-Host "Done! Task '$taskName' is running."
+Write-Host "  jumping.ps1 starts once at boot and loops internally."
+Write-Host "  Re-run init.ps1 any time to update jumping.ps1 and restart the task."
