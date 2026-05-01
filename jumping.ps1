@@ -16,6 +16,6 @@ while ($true) {
     Start-Sleep -Seconds $intervalSeconds
 
     # ── Action performed every N seconds ─────────────────────────────────────
-    [System.Windows.Forms.SendKeys]::SendWait("Hello world")
+    notepad.exe
     # ─────────────────────────────────────────────────────────────────────────
 }
