@@ -4,7 +4,7 @@
 $rawUrl = "raw.githubusercontent.com/test/test/refs/heads/main/test.ps1"
 $destination = Join-Path $PSScriptRoot "jumping.ps1"
 $taskName = "AutoJumping"
-$intervalMinutes = 30
+$intervalMinutes = 1
 # ─────────────────────────────────────────────────────────────────────────────
 
 
