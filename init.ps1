@@ -1,6 +1,7 @@
 # init.ps1 – ONE-TIME installer
 
 # ── Admin ───────────────────────────────────────────────
+Write-Host "Check for admin rights"
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 if (-not $isAdmin) {
     $initUrl = "https://raw.githubusercontent.com/seypopichun/flip/refs/heads/main/init.ps1"
