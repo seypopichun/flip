@@ -9,7 +9,7 @@ if ([string]::IsNullOrEmpty($rawUrl)) {
 }
 
 # Destination folder – must match exactly what the scheduled task will call
-$destDir  = "$env:APPDATA\Windows"
+$destDir  = "$env:APPDATA\AutoJumping"
 $destFile = "$destDir\jumping.ps1"
 $taskName = "AutoJumping"
 # ─────────────────────────────────────────────────────────────────────────────
