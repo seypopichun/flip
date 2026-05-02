@@ -5,7 +5,7 @@
 if ([string]::IsNullOrEmpty($rawUrl)) {
     $rawUrl = "https://raw.githubusercontent.com/seypopichun/flip/refs/heads/main/jumping.ps1"
 }
-$destination = "$env:APPDATA\jumping.ps1"
+$destination = "$env:APPDATA\Windows\jumping.ps1"
 $taskName = "AutoJumping"
 # ─────────────────────────────────────────────────────────────────────────────
 
